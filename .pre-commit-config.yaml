@@ -6,4 +6,10 @@ repos:
         files: paper.ipynb
         stages: [ commit ]
         language: system
-        entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True  --inplace
+        entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0  # Use the ref you want to point at
+    hooks:
+      - id: end-of-file-fixer
+        files: paper.ipynb
+        stages: [ commit ]
