@@ -17,3 +17,8 @@ def numeric_gradient(f, x, h=1e-6):
         x_minus[i] -= h  # вычитаем малое число из i-ой координаты
         grad[i] = (f(x_plus) - f(x_minus)) / (2 * h)  # вычисляем приближенное значение производной
     return grad
+
+
+# TODO Реализация градиентного спуска с модификациями из прошлой лабораторной работы (Learning rate scheduling + Adam)
+
+# TODO Реализация метода Gauss-Newton
