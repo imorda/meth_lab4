@@ -2,7 +2,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from linear_regression import poly
+from regression import poly
 
 def_visualization_area = ((-12, 12), (-12, 12))  # Область отрисовки графиков ((start, stop) x dims)
 def_visualization_resolution = 100  # Количество точек визуализации вдоль одной оси
@@ -127,3 +127,21 @@ def visualize_regression(weights: list, X, Y, x_name='', y_name='', line=False):
     ax.set_xlabel(x_name)
 
     ax.plot(x_axis, p(x_axis))
+
+
+def linear_demo_2args(points, f):
+
+  print("Всего точек:", len(points))
+  print("Минимум в ", points[-1])
+  print("Значение функции в точке минимума: ", f(points[-1]))
+
+
+  step = 1
+  pts_size = len(points)
+  while pts_size > 10000:
+    step *= 10
+    pts_size //= 10
+
+  X, Y = np.meshgrid(*calc_axes(def_visualization_area, def_visualization_resolution))
+  visualize_descent_2args(points[::step], f)
+  visualize_regression(list(map(float,points[-1])), X, Y, x_name="Время подготовки, часы", y_name="Балл")
