@@ -122,3 +122,30 @@ def gauss_newton_descent(x0, rsl, grad, tol=1e-6, max_iter=10):
         if np.linalg.norm(dp) < tol:
             break
     return p
+
+
+def powell_dog_leg(x0, rsl, grad, tol=1e-6, max_iter=100, delta0=1.0):
+    p = x0
+    delta = delta0
+    # todo: region
+    for k in range(max_iter):
+        J = np.array([grad(ri, p) for ri in rsl])
+        r = np.array([ri(p) for ri in rsl], dtype=np.float64)
+        B = J.T @ J
+        dp_gn = np.linalg.pinv(B) @ J.T @ r
+        if np.linalg.norm(dp_gn) <= delta:
+            dp = dp_gn
+        else:
+            g = J.T @ r
+            dp_sd = g.T @ g / (g.T @ B @ g) * g
+            if np.linalg.norm(dp_sd) >= delta:
+                dp = dp_sd / np.linalg.norm(dp_sd) * delta
+            else:
+                alpha = np.linalg.norm(dp_gn - dp_sd) ** 2 / (
+                    2 * (np.linalg.norm(dp_gn) ** 2 - np.linalg.norm(dp_sd) ** 2)
+                )
+                dp = alpha * dp_gn + (1 - alpha) * dp_sd
+        p = p - dp
+        if np.linalg.norm(dp) < tol:
+            break
+    return p
