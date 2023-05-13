@@ -46,9 +46,20 @@ def step_decay(lr0, drop, epochs_drop):
 
     return f
 
-def adam_minibatch_descent(f: ty.List[ty.Callable], df, x0, decay, tol,
-                           n_epochs,
-                           batch_size=1, betta1=0.9, betta2=0.9, silent=False, global_stats=False):
+
+def adam_minibatch_descent(
+    f: ty.List[ty.Callable],
+    df,
+    x0,
+    decay,
+    tol,
+    n_epochs,
+    batch_size=1,
+    betta1=0.9,
+    betta2=0.9,
+    silent=False,
+    global_stats=False,
+):
     random.shuffle(f)
     n = len(f)
     points = [x0]
@@ -71,22 +82,43 @@ def adam_minibatch_descent(f: ty.List[ty.Callable], df, x0, decay, tol,
             last_epoch = i * batch_size // n
 
         x = points[-1]
-        part_grad = np.array(to_num(sum(df(f[(i * batch_size + j) % n], x) for j in range(batch_size)) / batch_size),
-                             dtype=Num)
+        part_grad = np.array(
+            to_num(
+                sum(df(f[(i * batch_size + j) % n], x) for j in range(batch_size))
+                / batch_size
+            ),
+            dtype=Num,
+        )
 
         last_grads += part_grad
         num_grads += 1
 
-        grad_square_steps.append(grad_square_steps[-1] * betta1 + part_grad ** 2 * (1 - betta1))
+        grad_square_steps.append(
+            grad_square_steps[-1] * betta1 + part_grad**2 * (1 - betta1)
+        )
         grad_steps.append(grad_steps[-1] * betta2 + part_grad * (1 - betta2))
         grad_step_normalized = grad_steps[-1] / (1 - betta1 ** (i + 1))
         grad_square_step_normalized = grad_square_steps[-1] / (1 - betta2 ** (i + 1))
         points.append(
-            x - decay(i * batch_size // n) * grad_step_normalized * (grad_square_step_normalized + eps) ** (-1 / 2))
+            x
+            - decay(i * batch_size // n)
+            * grad_step_normalized
+            * (grad_square_step_normalized + eps) ** (-1 / 2)
+        )
 
     if global_stats:
         global _stats
         _stats.append(len(points))
     return points
 
-# TODO Реализация метода Gauss-Newton
+
+def gauss_newton_descent(x0, rsl, grad, tol=1e-6, max_iter=10):
+    p = x0
+    for i in range(max_iter):
+        J = np.array([grad(ri, p) for ri in rsl])
+        r = np.array([ri(p) for ri in rsl], dtype=np.float64)
+        dp = np.linalg.pinv(J.T @ J) @ J.T @ r
+        p -= dp
+        if np.linalg.norm(dp) < tol:
+            break
+    return p
