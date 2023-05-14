@@ -55,7 +55,7 @@ def loss_funcs_sinus(X, Y, reg_part=lambda W: 0):
 
         accum += W[-3] * np.sin((W[-2] * X[i] + W[-1]).astype(float))
 
-        return (accum - Y[i]) ** 2 + reg_part(W)
+        return accum - Y[i]
 
     def _gen(i):
         return lambda W: _loss_func_sinus(W, i)
