@@ -26,6 +26,67 @@ def numeric_gradient(f, x, h=1e-6):
     return grad
 
 
+def dichotomy(f, a, b, l):
+    """
+    Реализация лиенйного поиска с помощью метода дихотомии
+
+    :param function f
+    :param float a: начало отрезка
+    :param float b: конец отрезка
+    :param float l: искомая длина шага
+    """
+    eps = l / 5
+    func_calls = 0
+    while (b - a) > l:
+        y = (a + b + eps) / 2
+        z = (a + b - eps) / 2
+        if f(y) > f(z):
+            b = z
+        else:
+            a = y
+
+        func_calls += 2
+    return func_calls, (a + b) / 2
+
+
+def dichotomy(f, a, b, l):
+    """
+    Реализация лиенйного поиска с помощью метода дихотомии
+
+    :param function f
+    :param float a: начало отрезка
+    :param float b: конец отрезка
+    :param float l: искомая длина шага
+    """
+    eps = l / 5
+    func_calls = 0
+    while (b - a) > l:
+        y = (a + b + eps) / 2
+        z = (a + b - eps) / 2
+        if f(y) > f(z):
+            b = z
+        else:
+            a = y
+
+        func_calls += 2
+    return func_calls, (a + b) / 2
+
+
+def wolfe_conditions(f: ty.Callable, df: ty.Callable, x, d, c1 = 0.01, c2 = 0.9, tol = 1e-4):
+    f_x = f(x)
+    grad_f_x = df(f ,x)
+    t = 1.0
+
+    f_calls = df_calls = 1
+
+    while t > tol and (f(x + t * d) > f_x + c1 * t * grad_f_x.dot(d)\
+            or df(f, x + t * d).dot(d) < c2 * grad_f_x.dot(d)): # пока не выполняются условия Вольфе, уменьшаем шаг
+            t *= c2
+            f_calls += 1
+            df_calls += 1
+
+    return t, f_calls, df_calls
+
 def constant_lr_decay(lr):
     def f(*_, **__):
         return lr
