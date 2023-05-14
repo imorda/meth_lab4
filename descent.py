@@ -49,43 +49,23 @@ def dichotomy(f, a, b, l):
     return func_calls, (a + b) / 2
 
 
-def dichotomy(f, a, b, l):
-    """
-    Реализация лиенйного поиска с помощью метода дихотомии
-
-    :param function f
-    :param float a: начало отрезка
-    :param float b: конец отрезка
-    :param float l: искомая длина шага
-    """
-    eps = l / 5
-    func_calls = 0
-    while (b - a) > l:
-        y = (a + b + eps) / 2
-        z = (a + b - eps) / 2
-        if f(y) > f(z):
-            b = z
-        else:
-            a = y
-
-        func_calls += 2
-    return func_calls, (a + b) / 2
-
-
-def wolfe_conditions(f: ty.Callable, df: ty.Callable, x, d, c1 = 0.01, c2 = 0.9, tol = 1e-4):
+def wolfe_conditions(f: ty.Callable, df: ty.Callable, x, d, c1=0.01, c2=0.9, tol=1e-4):
     f_x = f(x)
-    grad_f_x = df(f ,x)
+    grad_f_x = df(f, x)
     t = 1.0
 
     f_calls = df_calls = 1
 
-    while t > tol and (f(x + t * d) > f_x + c1 * t * grad_f_x.dot(d)\
-            or df(f, x + t * d).dot(d) < c2 * grad_f_x.dot(d)): # пока не выполняются условия Вольфе, уменьшаем шаг
-            t *= c2
-            f_calls += 1
-            df_calls += 1
+    while t > tol and (
+        f(x + t * d) > f_x + c1 * t * grad_f_x.dot(d)
+        or df(f, x + t * d).dot(d) < c2 * grad_f_x.dot(d)
+    ):  # пока не выполняются условия Вольфе, уменьшаем шаг
+        t *= c2
+        f_calls += 1
+        df_calls += 1
 
     return t, f_calls, df_calls
+
 
 def constant_lr_decay(lr):
     def f(*_, **__):
@@ -170,6 +150,29 @@ def adam_minibatch_descent(
     if global_stats:
         global _stats
         _stats.append(len(points))
+    return points
+
+
+def grad_descent_with_dichotomy(f, df, x0, lr, tol=0.01, epoch=1000):
+    """
+    :param f: Исследуемая функция
+    :param df: Функция вычисления градиента
+    :param x0: Начальная точка
+    :param lr: Learning rate
+    :param tol: Условие останова по достижению необходимой точности (нормы градиента)
+    :param epoch: Ограничение числа итераций
+    :return: Кортеж из точек, кол-ва вызовов функции f, количества итераций
+    """
+    points = [x0]
+    for i in range(1, epoch):
+        x = points[-1]
+        grad = df(f, x)
+        # print(np.linalg.norm(grad))
+        if np.linalg.norm(grad) < tol:
+            break
+        func_calls, t = dichotomy(lambda t: f(x - t * grad), 0, lr, lr / 1e3)
+        points.append(x - t * grad)
+
     return points
 
 

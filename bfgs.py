@@ -6,17 +6,19 @@ from descent import wolfe_conditions, dichotomy
 
 from funcs import f_bukin, f_matias
 
+
 def rho_calc(y, s):
     return 1 / np.dot(y.T, s)
+
 
 def bfgs(f: ty.Callable, df: ty.Callable, x_0, epochs, tol=1e-6, ls_tol=1e-6):
     i = 0
     E = np.eye(len(x_0))
 
-    H_i = E # reversed (^-1) hessian
-    x_i = x_0 # point
-    df_x_i = df(f, x_0) # derivative at x_i
-
+    H_i = E  # reversed (^-1) hessian
+    points = [x_0]
+    x_i = x_0  # point
+    df_x_i = df(f, x_0)  # derivative at x_i
 
     while i < epochs and np.linalg.norm(df_x_i) > tol:
         p_i = -np.dot(H_i, df_x_i)
@@ -32,17 +34,20 @@ def bfgs(f: ty.Callable, df: ty.Callable, x_0, epochs, tol=1e-6, ls_tol=1e-6):
 
         H_i = np.dot(m1, np.dot(H_i, m2)) + rho * np.dot(s, s.T)
         x_i = x_i1
+        points.append(x_i)
         df_x_i = df(f, x_i)
 
         i += 1
 
-    return x_i, i
+    return points
+
 
 # m --- is size of "batch" of precompiled data
 def l_bfgs(f: ty.Callable, df: ty.Callable, x_0, epochs, m=5, tol=1e-9, ls_tol=1e-6):
     E = np.eye(len(x_0))
 
     H_i = E  # reversed (^-1) hessian
+    points = [x_0]
     x_i = x_0  # point
     df_x_i = df(f, x_0)  # derivative at x_i
 
@@ -66,9 +71,11 @@ def l_bfgs(f: ty.Callable, df: ty.Callable, x_0, epochs, m=5, tol=1e-9, ls_tol=1
 
         H_i = np.dot(m1, np.dot(H_i, m2)) + rho * np.dot(s, s.T)
         x_i = x_i1
+        points.append(x_i)
         df_x_i = df(f, x_i)
 
     i = m
+
     def alpha_calc(j, q):
         return rho_calc(ys[-j], ss[-j]) * np.dot(ss[-j].T, q)
 
@@ -99,8 +106,9 @@ def l_bfgs(f: ty.Callable, df: ty.Callable, x_0, epochs, m=5, tol=1e-9, ls_tol=1
         ss.append(s)
 
         x_i = x_i1
+        points.append(x_i)
         df_x_i = df(f, x_i)
 
         i += 1
 
-    return x_i, i
+    return points

@@ -27,7 +27,17 @@ def visualize_descent_2args(
     f,
     visualization_area=def_visualization_area,
     visualization_resolution=def_visualization_resolution,
-    print_points=False,
+):
+    return visualize_multiple_descent_2args(
+        {"": points}, f, visualization_area, visualization_resolution
+    )
+
+
+def visualize_multiple_descent_2args(
+    all_points: dict,
+    f,
+    visualization_area=def_visualization_area,
+    visualization_resolution=def_visualization_resolution,
 ):
     """
     Функция для визуализации работы градиентного спуска на функции f. Первым
@@ -36,30 +46,25 @@ def visualize_descent_2args(
     Параметры:
         points: шаги градиентного спуска
     """
-    points = np.array(points)
     fig, (ax1, ax2) = plt.subplots(1, 2)
-    if print_points:
-        print(points[:10])
-        print("...")
-        print(points[-10:])
     X, Y = np.meshgrid(*calc_axes(visualization_area, visualization_resolution))
     values = f(np.stack((X, Y)))
     ax2.contour(
         X,
         Y,
         values,
-        levels=np.unique(
-            np.sort(
-                np.concatenate(
-                    (f(points.T), np.linspace(np.amin(values), np.amax(values), 100))
-                )
-            )
-        ),
+        levels=np.unique(np.sort(np.linspace(np.amin(values), np.amax(values), 100))),
     )
-    ax1.plot(f(points.T))
     ax1.set_yscale("symlog")
     ax1.grid()
-    ax2.plot(points[:, 0], points[:, 1], "-")
+
+    for i in all_points:
+        points = np.array(all_points[i])
+        ax1.plot(f(points.T), label=i)
+        ax2.plot(points[:, 0], points[:, 1], "-", label=i)
+
+    ax1.legend()
+    ax2.legend()
     ax1.set_xlabel("# of iter", fontsize=20)
     ax1.set_ylabel("f(X)", fontsize=20)
     ax2.set_xlabel("X", fontsize=20)
@@ -145,19 +150,64 @@ def visualize_regression(weights: list, X, Y, x_name="", y_name="", line=False):
     ax.plot(x_axis, p(x_axis))
 
 
-def linear_demo_2args(points, f):
+def visualize_multiple_regression(
+    all_weights: dict, X, Y, x_name="", y_name="", line=False
+):
+    x_axis = np.linspace(np.min(X), np.max(X), def_visualization_resolution)
 
-  print("Всего точек:", len(points))
-  print("Минимум в ", points[-1])
-  print("Значение функции в точке минимума: ", f(points[-1]))
+    fig, ax = plt.subplots()
+
+    if line:
+        ax.plot(X, Y)
+    else:
+        ax.plot(X, Y, linestyle="none", marker=".")
+    ax.set_ylabel(y_name)
+    ax.set_xlabel(x_name)
+
+    for i in all_weights:
+        p = poly(all_weights[i])
+        ax.plot(x_axis, p(x_axis), label=i)
+    ax.legend()
 
 
-  step = 1
-  pts_size = len(points)
-  while pts_size > 10000:
-    step *= 10
-    pts_size //= 10
+def linear_demo_2args(points, f, X, Y):
+    print("Всего точек:", len(points))
+    print("Минимум в ", points[-1])
+    print("Значение функции в точке минимума: ", f(points[-1]))
 
-  X, Y = np.meshgrid(*calc_axes(def_visualization_area, def_visualization_resolution))
-  visualize_descent_2args(points[::step], f)
-  visualize_regression(list(map(float,points[-1])), X, Y, x_name="Время подготовки, часы", y_name="Балл")
+    step = 1
+    pts_size = len(points)
+    while pts_size > 10000:
+        step *= 10
+        pts_size //= 10
+
+    visualize_descent_2args(points[::step], f)
+    visualize_regression(
+        list(map(float, points[-1])),
+        X,
+        Y,
+        x_name="Время подготовки, часы",
+        y_name="Балл",
+    )
+
+
+def linear_multiple_demo_2args(all_points: dict, f, X, Y):
+    print("Всего точек:", len(list(all_points.values())[0]))
+    print("Минимум в ", list(all_points.values())[0][-1])
+    print("Значение функции в точке минимума: ", f(list(all_points.values())[0][-1]))
+
+    step = 1
+    pts_size = len(list(all_points.values())[0])
+    while pts_size > 10000:
+        step *= 10
+        pts_size //= 10
+
+    visualize_multiple_descent_2args(all_points, f)
+
+    weights = {}
+    for i in all_points:
+        weights[i] = list(map(float, (all_points[i])[-1]))
+
+    visualize_multiple_regression(
+        weights, X, Y, x_name="Время подготовки, часы", y_name="Балл"
+    )
