@@ -133,17 +133,14 @@ def print_stats(iters, func_calls=-1, grad_calls=-1, points=[(), ()]):
     )
 
 
-def visualize_regression(weights: list, X, Y, x_name="", y_name="", line=False):
-    p = poly(weights)
+def visualize_regression(weights: list, X, Y, x_name="", y_name="", regression=poly):
+    p = regression(weights)
 
     x_axis = np.linspace(np.min(X), np.max(X), def_visualization_resolution)
 
     fig, ax = plt.subplots()
 
-    if line:
-        ax.plot(X, Y)
-    else:
-        ax.plot(X, Y, linestyle="none", marker=".")
+    ax.plot(X, Y, linestyle="none", marker=".")
     ax.set_ylabel(y_name)
     ax.set_xlabel(x_name)
 
@@ -170,7 +167,7 @@ def visualize_multiple_regression(
     ax.legend()
 
 
-def linear_demo_2args(points, f, X, Y):
+def linear_demo_2args(points, f, X, Y, xname="Время подготовки, часы", yname="Балл"):
     print("Всего точек:", len(points))
     print("Минимум в ", points[-1])
     print("Значение функции в точке минимума: ", f(points[-1]))
@@ -186,8 +183,8 @@ def linear_demo_2args(points, f, X, Y):
         list(map(float, points[-1])),
         X,
         Y,
-        x_name="Время подготовки, часы",
-        y_name="Балл",
+        x_name=xname,
+        y_name=yname,
     )
 
 

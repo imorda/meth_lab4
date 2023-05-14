@@ -176,19 +176,22 @@ def grad_descent_with_dichotomy(f, df, x0, lr, tol=0.01, epoch=1000):
     return points
 
 
-def gauss_newton_descent(x0, rsl, grad, tol=1e-6, max_iter=10):
+def gauss_newton_descent(x0: np.ndarray, rsl, grad, tol=1e-6, max_iter=10):
+    points = [x0.copy()]
     p = x0
     for i in range(max_iter):
         J = np.array([grad(ri, p) for ri in rsl])
         r = np.array([ri(p) for ri in rsl], dtype=np.float64)
         dp = np.linalg.pinv(J.T @ J) @ J.T @ r
         p -= dp
+        points.append(p.copy())
         if np.linalg.norm(dp) < tol:
             break
-    return p
+    return points
 
 
 def powell_dog_leg(x0, rsl, grad, tol=1e-6, max_iter=100, delta0=1.0):
+    points = [x0.copy()]
     p = x0
     delta = delta0
     # todo: region
@@ -210,6 +213,7 @@ def powell_dog_leg(x0, rsl, grad, tol=1e-6, max_iter=100, delta0=1.0):
                 )
                 dp = alpha * dp_gn + (1 - alpha) * dp_sd
         p = p - dp
+        points.append(p.copy())
         if np.linalg.norm(dp) < tol:
             break
-    return p
+    return points
