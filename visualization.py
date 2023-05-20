@@ -38,6 +38,7 @@ def visualize_multiple_descent_2args(
     f,
     visualization_area=def_visualization_area,
     visualization_resolution=def_visualization_resolution,
+    print_points=False,
 ):
     """
     Функция для визуализации работы градиентного спуска на функции f. Первым
@@ -59,6 +60,8 @@ def visualize_multiple_descent_2args(
     ax1.grid()
 
     for i in all_points:
+        if print_points:
+            print(f"Конечная точка метода {i}: {all_points[i][-1]}")
         points = np.array(all_points[i])
         ax1.plot(f(points.T), label=i)
         ax2.plot(points[:, 0], points[:, 1], "-", label=i)

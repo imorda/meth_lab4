@@ -35,7 +35,6 @@ def loss_funcs(X, Y, reg_part=lambda W: 0):
                 )
                 - Y[i]
             )
-            ** 2
             + reg_part(W)
         )
 
@@ -67,4 +66,4 @@ def loss_funcs_sinus(X, Y, reg_part=lambda W: 0):
 
 
 def loss_func(funcs):
-    return lambda W: sum([i(W) for i in funcs]) / len(funcs)
+    return lambda W: sum([i(W) ** 2 for i in funcs])
