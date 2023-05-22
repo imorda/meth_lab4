@@ -6,7 +6,7 @@ from regression import poly
 
 def_visualization_area = (
     (-12, 12),
-    (-12, 12),
+    (-12, 17),
 )  # Область отрисовки графиков ((start, stop) x dims)
 def_visualization_resolution = 100  # Количество точек визуализации вдоль одной оси
 

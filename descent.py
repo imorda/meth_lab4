@@ -153,6 +153,219 @@ def adam_minibatch_descent(
     return points
 
 
+def rmsprop_minibatch_descent(
+    f: ty.List[ty.Callable],
+    df,
+    x0,
+    lr,
+    tol,
+    n_epochs,
+    batch_size=1,
+    alpha=0.9,
+    silent=False,
+    global_stats=False,
+):
+    random.shuffle(f)
+    n = len(f)
+    points = [x0]
+    grad_steps = [np.array([Num(0)] * len(x0), dtype=Num)]
+    eps = 1e-8
+
+    last_grads = np.array([Num(0.0) for _ in range(len(x0))], dtype=Num)
+    num_grads = 0
+    last_epoch = 0
+
+    for i in range(n // batch_size * n_epochs):
+        if i * batch_size // n > last_epoch:
+            if np.linalg.norm(last_grads / num_grads) < tol:
+                if not silent:
+                    print(np.linalg.norm(last_grads / num_grads))
+                break
+            last_grads = 0.0
+            num_grads = 0
+            last_epoch = i * batch_size // n
+
+        x = points[-1]
+        part_grad = np.array(
+            to_num(
+                sum(df(f[(i * batch_size + j) % n], x) for j in range(batch_size))
+                / batch_size
+            ),
+            dtype=Num,
+        )
+
+        last_grads += part_grad
+        num_grads += 1
+
+        grad_steps.append(grad_steps[-1] * alpha + part_grad**2 * (1 - alpha))
+        points.append(
+            x
+            - lr(i * batch_size // n)
+            * (part_grad * ((grad_steps[-1] + eps) ** (-1 / 2)))
+        )
+
+    if global_stats:
+        global _stats
+        _stats.append(len(points))
+    return points
+
+
+def adagrad_minibatch_descent(
+    f: ty.List[ty.Callable],
+    df,
+    x0,
+    lr,
+    tol,
+    n_epochs,
+    batch_size=1,
+    silent=False,
+    global_stats=False,
+):
+    random.shuffle(f)
+    n = len(f)
+    points = [x0]
+    grad_sums = np.zeros((len(x0)), dtype=Num)
+    eps = 1e-8  # сглаживающий параметр, чтобы избежать деления на 0
+
+    last_grads = np.array([Num(0.0) for _ in range(len(x0))], dtype=Num)
+    num_grads = 0
+    last_epoch = 0
+
+    for i in range(n // batch_size * n_epochs):
+        if i * batch_size // n > last_epoch:
+            if np.linalg.norm(last_grads / num_grads) < tol:
+                if not silent:
+                    print(np.linalg.norm(last_grads / num_grads))
+                break
+            last_grads = 0.0
+            num_grads = 0
+            last_epoch = i * batch_size // n
+
+        x = points[-1]
+        part_grad = np.array(
+            to_num(
+                sum(df(f[(i * batch_size + j) % n], x) for j in range(batch_size))
+                / batch_size
+            ),
+            dtype=Num,
+        )
+        grad_sums += part_grad**2
+
+        last_grads += part_grad
+        num_grads += 1
+
+        points.append(
+            x - lr(i * batch_size // n) * (part_grad * (grad_sums + eps) ** (-1 / 2))
+        )
+
+    if global_stats:
+        global _stats
+        _stats.append(len(points))
+    return points
+
+
+def momentum_minibatch_descent(
+    f: ty.List[ty.Callable],
+    df,
+    x0,
+    lr,
+    tol,
+    n_epochs,
+    batch_size=1,
+    alpha=0.9,
+    silent=False,
+    global_stats=False,
+):
+    random.shuffle(f)
+    n = len(f)
+    points = [x0]
+
+    last_grads = np.array([Num(0.0) for _ in range(len(x0))], dtype=Num)
+    num_grads = 0
+    last_epoch = 0
+
+    grad_steps = [np.array([0] * len(x0))]
+    for i in range(n // batch_size * n_epochs):
+        if i * batch_size // n > last_epoch:
+            if np.linalg.norm(last_grads / num_grads) < tol:
+                if not silent:
+                    print(np.linalg.norm(last_grads / num_grads))
+                break
+            last_grads = 0.0
+            num_grads = 0
+            last_epoch = i * batch_size // n
+
+        part_grad = np.array(
+            to_num(
+                sum(
+                    df(f[(i * batch_size + j) % n], points[-1])
+                    for j in range(batch_size)
+                )
+                / batch_size
+            ),
+            dtype=Num,
+        )
+
+        last_grads += part_grad
+        num_grads += 1
+
+        grad_steps.append(alpha * grad_steps[-1] + (1 - alpha) * part_grad)
+        points.append(points[-1] - lr(i * batch_size // n) * grad_steps[-1])
+    if global_stats:
+        global _stats
+        _stats.append(len(points))
+    return points
+
+
+def minibatch_descent(
+    f: ty.List[ty.Callable],
+    df,
+    x0,
+    lr,
+    tol,
+    n_epochs,
+    batch_size=1,
+    silent=False,
+    global_stats=False,
+):
+    random.shuffle(f)
+    n = len(f)
+    points = [x0]
+
+    last_grads = np.array([Num(0.0) for _ in range(len(x0))], dtype=Num)
+    num_grads = 0
+    last_epoch = 0
+
+    for i in range(n // batch_size * n_epochs):
+        if i * batch_size // n > last_epoch:
+            if np.linalg.norm(last_grads / num_grads) < tol:
+                if not silent:
+                    print(np.linalg.norm(last_grads / num_grads))
+                break
+            last_grads = 0.0
+            num_grads = 0
+            last_epoch = i * batch_size // n
+
+        x = points[-1]
+        part_grad = np.array(
+            to_num(
+                sum([df(f[(i * batch_size + j) % n], x) for j in range(batch_size)])
+                / batch_size
+            ),
+            dtype=Num,
+        )
+
+        last_grads += part_grad
+        num_grads += 1
+
+        points.append(x - lr(i * batch_size // n) * part_grad)
+
+    if global_stats:
+        global _stats
+        _stats.append(len(points))
+    return points
+
+
 def grad_descent_with_dichotomy(f, df, x0, lr, tol=0.01, epoch=1000):
     """
     :param f: Исследуемая функция
