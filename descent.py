@@ -2,6 +2,7 @@ import math
 import random
 import typing as ty
 import numpy as np
+import torch
 
 from profiler import Num, to_num
 
@@ -317,6 +318,63 @@ def momentum_minibatch_descent(
     return points
 
 
+def nesterov_minibatch_descent(
+    f: ty.List[ty.Callable],
+    df,
+    x0,
+    lr,
+    tol,
+    n_epochs,
+    batch_size=1,
+    alpha=0.9,
+    silent=False,
+    global_stats=False,
+):
+    random.shuffle(f)
+    n = len(f)
+    points = [x0]
+
+    last_grads = np.array(to_num([0.0 for _ in range(len(x0))]), dtype=Num)
+    num_grads = 0
+    last_epoch = 0
+
+    grad_steps = [np.array([Num(0.0)] * len(x0), dtype=Num)]
+
+    for i in range(n // batch_size * n_epochs):
+        if i * batch_size // n > last_epoch:
+            if np.linalg.norm(last_grads / num_grads) < tol:
+                if not silent:
+                    print(np.linalg.norm(last_grads / num_grads))
+                break
+            last_grads = 0.0
+            num_grads = 0
+            last_epoch = i * batch_size // n
+
+        lri = lr(i * batch_size // n)
+        approx_next_point = points[-1] - lri * alpha * grad_steps[-1]
+        part_grad = np.array(
+            to_num(
+                sum(
+                    df(f[(i * batch_size + j) % n], approx_next_point)
+                    for j in range(batch_size)
+                )
+                / batch_size
+            ),
+            dtype=Num,
+        )
+
+        last_grads += part_grad
+        num_grads += 1
+
+        grad_steps.append(alpha * grad_steps[-1] + (1 - alpha) * part_grad)
+        points.append(points[-1] - lri * grad_steps[-1])
+
+    if global_stats:
+        global _stats
+        _stats.append(len(points))
+    return points
+
+
 def minibatch_descent(
     f: ty.List[ty.Callable],
     df,
@@ -435,4 +493,18 @@ def powell_dog_leg(x0, rsl, grad, tol=1e-8, max_iter=10, delta0=1.0):
         if rho < 0.25:
             delta = 0.5 * delta
 
+    return points
+
+
+def torch_descent(optimizer, f, decay, *decay_params):
+    scheduler = decay(optimizer, *decay_params)
+    x0 = optimizer.param_groups[0]["params"][0]
+    points = [x0.detach().numpy().copy()]
+    for epoch in range(1000):
+        func = f(x0)
+        optimizer.zero_grad()
+        func.backward()
+        optimizer.step()
+        scheduler.step()
+        points.append(x0.detach().numpy().copy())
     return points
