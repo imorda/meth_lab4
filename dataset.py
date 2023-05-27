@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from torch.utils.data import Dataset
+
 from regression import loss_funcs, loss_func, loss_funcs_sinus
 
 
@@ -46,3 +48,16 @@ def get_data_weather():
     Y = dataset["Средняя температура, С"].to_numpy(dtype=np.float64)
     assert len(X) == len(Y)
     return X, Y
+
+
+class TorchDataset(Dataset):
+    def __init__(self, X, Y):
+        self.x = X
+        self.y = Y
+        self.len = self.x.shape[0]
+
+    def __getitem__(self, item):
+        return self.x[item], self.y[item]
+
+    def __len__(self):
+        return self.len

@@ -96,12 +96,14 @@ def adam_minibatch_descent(
     decay,
     tol,
     n_epochs,
-    batch_size=1,
+    batch_size=None,
     betta1=0.9,
     betta2=0.9,
     silent=False,
     global_stats=False,
 ):
+    if batch_size is None:
+        batch_size = len(f)
     random.shuffle(f)
     n = len(f)
     points = [x0]
@@ -161,11 +163,13 @@ def rmsprop_minibatch_descent(
     lr,
     tol,
     n_epochs,
-    batch_size=1,
+    batch_size=None,
     alpha=0.9,
     silent=False,
     global_stats=False,
 ):
+    if batch_size is None:
+        batch_size = len(f)
     random.shuffle(f)
     n = len(f)
     points = [x0]
@@ -218,10 +222,12 @@ def adagrad_minibatch_descent(
     lr,
     tol,
     n_epochs,
-    batch_size=1,
+    batch_size=None,
     silent=False,
     global_stats=False,
 ):
+    if batch_size is None:
+        batch_size = len(f)
     random.shuffle(f)
     n = len(f)
     points = [x0]
@@ -272,11 +278,13 @@ def momentum_minibatch_descent(
     lr,
     tol,
     n_epochs,
-    batch_size=1,
+    batch_size=None,
     alpha=0.9,
     silent=False,
     global_stats=False,
 ):
+    if batch_size is None:
+        batch_size = len(f)
     random.shuffle(f)
     n = len(f)
     points = [x0]
@@ -325,11 +333,13 @@ def nesterov_minibatch_descent(
     lr,
     tol,
     n_epochs,
-    batch_size=1,
+    batch_size=None,
     alpha=0.9,
     silent=False,
     global_stats=False,
 ):
+    if batch_size is None:
+        batch_size = len(f)
     random.shuffle(f)
     n = len(f)
     points = [x0]
@@ -382,10 +392,12 @@ def minibatch_descent(
     lr,
     tol,
     n_epochs,
-    batch_size=1,
+    batch_size=None,
     silent=False,
     global_stats=False,
 ):
+    if batch_size is None:
+        batch_size = len(f)
     random.shuffle(f)
     n = len(f)
     points = [x0]
@@ -496,15 +508,32 @@ def powell_dog_leg(x0, rsl, grad, tol=1e-8, max_iter=10, delta0=1.0):
     return points
 
 
-def torch_descent(optimizer, f, decay, *decay_params):
+def torch_descent(optimizer, f, epoch, decay, *decay_params):
     scheduler = decay(optimizer, *decay_params)
     x0 = optimizer.param_groups[0]["params"][0]
     points = [x0.detach().numpy().copy()]
-    for epoch in range(1000):
+    for epoch in range(epoch):
         func = f(x0)
         optimizer.zero_grad()
         func.backward()
         optimizer.step()
         scheduler.step()
         points.append(x0.detach().numpy().copy())
+    return points
+
+
+def torch_descent_stochastic(
+    optimizer, f_factory, data_loader, epoch, decay, *decay_params
+):
+    scheduler = decay(optimizer, *decay_params)
+    x0 = optimizer.param_groups[0]["params"][0]
+    points = [x0.detach().numpy().copy()]
+    for epoch in range(epoch):
+        for x, y in data_loader:
+            loss = f_factory(x, y)(x0)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            points.append(x0.detach().numpy().copy())
+        scheduler.step()
     return points

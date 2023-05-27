@@ -20,3 +20,11 @@ def f_rosenbrock_chunk():
 
 def squared(funcs: list):
     return [(lambda x, i=i: i(x) ** 2) for i in funcs]
+
+
+def torch_poly(a, x):
+    return torch.matmul(torch.pow(torch.unsqueeze(x, -1), torch.arange(len(a))), a)
+
+
+def torch_loss(x, y):
+    return lambda w, x=x, y=y: torch.nn.functional.mse_loss(torch_poly(w, x), y)
