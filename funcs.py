@@ -23,7 +23,9 @@ def squared(funcs: list):
 
 
 def torch_poly(a, x):
-    return torch.matmul(torch.pow(torch.unsqueeze(x, -1), torch.arange(len(a))), a)
+    return torch.matmul(
+        torch.pow(torch.unsqueeze(x, -1), torch.arange(len(a), device=a.device)), a
+    )
 
 
 def torch_loss(x, y):

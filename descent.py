@@ -527,13 +527,14 @@ def torch_descent_stochastic(
 ):
     scheduler = decay(optimizer, *decay_params)
     x0 = optimizer.param_groups[0]["params"][0]
-    points = [x0.detach().numpy().copy()]
+    points = []
+    points = [x0.detach().cpu().numpy().copy()]
     for epoch in range(epoch):
         for x, y in data_loader:
             loss = f_factory(x, y)(x0)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            points.append(x0.detach().numpy().copy())
+            points.append(x0.detach().cpu().numpy().copy())
         scheduler.step()
     return points
