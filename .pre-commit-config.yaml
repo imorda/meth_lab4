@@ -13,15 +13,3 @@ repos:
       - id: end-of-file-fixer
         files: paper.ipynb
         stages: [ commit ]
-
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-      - id: black
-        files: \.py$
-
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-      - id: black-jupyter
-        files: paper.ipynb

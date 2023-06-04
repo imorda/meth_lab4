@@ -2,9 +2,10 @@ import math
 import random
 import typing as ty
 import numpy as np
-import torch
+import scipy
 
 from profiler import Num, to_num
+from numdifftools import Jacobian, Hessian
 
 
 def numeric_gradient(f, x, h=1e-6):
@@ -472,7 +473,7 @@ def gauss_newton_descent(x0: np.ndarray, rsl, grad, tol=1e-8, max_iter=40):
     return points
 
 
-def powell_dog_leg(x0, rsl, grad, tol=1e-8, max_iter=10, delta0=1.0):
+def powell_dog_leg(x0, rsl, grad, tol=1e-8, max_iter=100, delta0=1.0):
     points = [x0.copy()]
     p = x0
     delta = delta0
@@ -538,3 +539,29 @@ def torch_descent_stochastic(
             points.append(x0.detach().cpu().numpy().copy())
         scheduler.step()
     return points
+
+
+def scipy_descent(*args, **kwargs):
+    options = kwargs.get("options", {})
+    options["return_all"] = True
+    kwargs["options"] = options
+    tt = scipy.optimize.minimize(*args, **kwargs).allvecs
+    return tt
+
+
+def get_jac(f):
+    f_jac = Jacobian(lambda x: f(x))
+
+    def jac(x, *a, **k):
+        return f_jac(x).ravel()
+
+    return jac
+
+
+def get_hess(f):
+    f_hess = Hessian(lambda x: f(x))
+
+    def hess(x, *a, **k):
+        return f_hess(x)
+
+    return hess
