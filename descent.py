@@ -23,7 +23,7 @@ def numeric_gradient(f, x, h=1e-6):
         x_minus = x.copy()
         x_minus[i] -= h  # вычитаем малое число из i-ой координаты
         grad[i] = (f(x_plus) - f(x_minus)) / (
-            2 * h
+                2 * h
         )  # вычисляем приближенное значение производной
     return grad
 
@@ -59,8 +59,8 @@ def wolfe_conditions(f: ty.Callable, df: ty.Callable, x, d, c1=0.01, c2=0.9, tol
     f_calls = df_calls = 1
 
     while t > tol and (
-        f(x + t * d) > f_x + c1 * t * grad_f_x.dot(d)
-        or df(f, x + t * d).dot(d) < c2 * grad_f_x.dot(d)
+            f(x + t * d) > f_x + c1 * t * grad_f_x.dot(d)
+            or df(f, x + t * d).dot(d) < c2 * grad_f_x.dot(d)
     ):  # пока не выполняются условия Вольфе, уменьшаем шаг
         t *= c2
         f_calls += 1
@@ -91,17 +91,17 @@ def step_decay(lr0, drop, epochs_drop):
 
 
 def adam_minibatch_descent(
-    f: ty.List[ty.Callable],
-    df,
-    x0,
-    decay,
-    tol,
-    n_epochs,
-    batch_size=None,
-    betta1=0.9,
-    betta2=0.9,
-    silent=False,
-    global_stats=False,
+        f: ty.List[ty.Callable],
+        df,
+        x0,
+        decay,
+        tol,
+        n_epochs,
+        batch_size=None,
+        betta1=0.9,
+        betta2=0.9,
+        silent=False,
+        global_stats=False,
 ):
     if batch_size is None:
         batch_size = len(f)
@@ -139,7 +139,7 @@ def adam_minibatch_descent(
         num_grads += 1
 
         grad_square_steps.append(
-            grad_square_steps[-1] * betta1 + part_grad**2 * (1 - betta1)
+            grad_square_steps[-1] * betta1 + part_grad ** 2 * (1 - betta1)
         )
         grad_steps.append(grad_steps[-1] * betta2 + part_grad * (1 - betta2))
         grad_step_normalized = grad_steps[-1] / (1 - betta1 ** (i + 1))
@@ -158,16 +158,16 @@ def adam_minibatch_descent(
 
 
 def rmsprop_minibatch_descent(
-    f: ty.List[ty.Callable],
-    df,
-    x0,
-    lr,
-    tol,
-    n_epochs,
-    batch_size=None,
-    alpha=0.9,
-    silent=False,
-    global_stats=False,
+        f: ty.List[ty.Callable],
+        df,
+        x0,
+        lr,
+        tol,
+        n_epochs,
+        batch_size=None,
+        alpha=0.9,
+        silent=False,
+        global_stats=False,
 ):
     if batch_size is None:
         batch_size = len(f)
@@ -203,7 +203,7 @@ def rmsprop_minibatch_descent(
         last_grads += part_grad
         num_grads += 1
 
-        grad_steps.append(grad_steps[-1] * alpha + part_grad**2 * (1 - alpha))
+        grad_steps.append(grad_steps[-1] * alpha + part_grad ** 2 * (1 - alpha))
         points.append(
             x
             - lr(i * batch_size // n)
@@ -217,15 +217,15 @@ def rmsprop_minibatch_descent(
 
 
 def adagrad_minibatch_descent(
-    f: ty.List[ty.Callable],
-    df,
-    x0,
-    lr,
-    tol,
-    n_epochs,
-    batch_size=None,
-    silent=False,
-    global_stats=False,
+        f: ty.List[ty.Callable],
+        df,
+        x0,
+        lr,
+        tol,
+        n_epochs,
+        batch_size=None,
+        silent=False,
+        global_stats=False,
 ):
     if batch_size is None:
         batch_size = len(f)
@@ -257,7 +257,7 @@ def adagrad_minibatch_descent(
             ),
             dtype=Num,
         )
-        grad_sums += part_grad**2
+        grad_sums += part_grad ** 2
 
         last_grads += part_grad
         num_grads += 1
@@ -273,16 +273,16 @@ def adagrad_minibatch_descent(
 
 
 def momentum_minibatch_descent(
-    f: ty.List[ty.Callable],
-    df,
-    x0,
-    lr,
-    tol,
-    n_epochs,
-    batch_size=None,
-    alpha=0.9,
-    silent=False,
-    global_stats=False,
+        f: ty.List[ty.Callable],
+        df,
+        x0,
+        lr,
+        tol,
+        n_epochs,
+        batch_size=None,
+        alpha=0.9,
+        silent=False,
+        global_stats=False,
 ):
     if batch_size is None:
         batch_size = len(f)
@@ -328,16 +328,16 @@ def momentum_minibatch_descent(
 
 
 def nesterov_minibatch_descent(
-    f: ty.List[ty.Callable],
-    df,
-    x0,
-    lr,
-    tol,
-    n_epochs,
-    batch_size=None,
-    alpha=0.9,
-    silent=False,
-    global_stats=False,
+        f: ty.List[ty.Callable],
+        df,
+        x0,
+        lr,
+        tol,
+        n_epochs,
+        batch_size=None,
+        alpha=0.9,
+        silent=False,
+        global_stats=False,
 ):
     if batch_size is None:
         batch_size = len(f)
@@ -387,15 +387,15 @@ def nesterov_minibatch_descent(
 
 
 def minibatch_descent(
-    f: ty.List[ty.Callable],
-    df,
-    x0,
-    lr,
-    tol,
-    n_epochs,
-    batch_size=None,
-    silent=False,
-    global_stats=False,
+        f: ty.List[ty.Callable],
+        df,
+        x0,
+        lr,
+        tol,
+        n_epochs,
+        batch_size=None,
+        silent=False,
+        global_stats=False,
 ):
     if batch_size is None:
         batch_size = len(f)
@@ -491,7 +491,7 @@ def powell_dog_leg(x0, rsl, grad, tol=1e-8, max_iter=100, delta0=1.0):
                 dp = dp_sd / np.linalg.norm(dp_sd) * delta
             else:
                 alpha = np.linalg.norm(dp_gn - dp_sd) ** 2 / (
-                    2 * (np.linalg.norm(dp_gn) ** 2 - np.linalg.norm(dp_sd) ** 2)
+                        2 * (np.linalg.norm(dp_gn) ** 2 - np.linalg.norm(dp_sd) ** 2)
                 )
                 dp = alpha * dp_gn + (1 - alpha) * dp_sd
         p = p - dp
@@ -499,8 +499,8 @@ def powell_dog_leg(x0, rsl, grad, tol=1e-8, max_iter=100, delta0=1.0):
         if np.linalg.norm(dp) < tol:
             break
         rho = (
-            np.linalg.norm(r) - np.linalg.norm([ri(p - dp) for ri in rsl])
-        ) / np.linalg.norm(dp)
+                      np.linalg.norm(r) - np.linalg.norm([ri(p - dp) for ri in rsl])
+              ) / np.linalg.norm(dp)
         if rho > 0.75:
             delta = max(delta, 2 * np.linalg.norm(dp))
         if rho < 0.25:
@@ -524,7 +524,7 @@ def torch_descent(optimizer, f, epoch, decay, *decay_params):
 
 
 def torch_descent_stochastic(
-    optimizer, f_factory, data_loader, epoch, decay, *decay_params
+        optimizer, f_factory, data_loader, epoch, decay, *decay_params
 ):
     scheduler = decay(optimizer, *decay_params)
     x0 = optimizer.param_groups[0]["params"][0]
@@ -541,12 +541,30 @@ def torch_descent_stochastic(
     return points
 
 
-def scipy_descent(*args, **kwargs):
-    options = kwargs.get("options", {})
-    options["return_all"] = True
-    kwargs["options"] = options
-    tt = scipy.optimize.minimize(*args, **kwargs).allvecs
-    return tt
+def scipy_descent(f, *args, **kwargs):
+    all_points = []
+
+    def callback(x, *a, **k):
+        all_points.append(x.copy())
+        return f(x)
+
+    # options = kwargs.get("options", {})
+    # options["return_all"] = True
+    # kwargs["options"] = options
+    kwargs['callback'] = callback
+    scipy.optimize.minimize(f, *args, **kwargs)
+    return all_points
+
+
+def scipy_least_squares(f, *args, **kwargs):
+    all_iterates = []
+
+    def ff(x, meh=None):
+        all_iterates.append(x.copy())
+        return f(x)
+
+    scipy.optimize.least_squares(ff, *args, **kwargs)
+    return all_iterates
 
 
 def get_jac(f):

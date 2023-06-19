@@ -30,3 +30,16 @@ def torch_poly(a, x):
 
 def torch_loss(x, y):
     return lambda w, x=x, y=y: torch.nn.functional.mse_loss(torch_poly(w, x), y)
+
+
+def f_rosenbrock_torch(x):
+    x = torch.tensor(x)
+    x.requires_grad = True
+    r = torch.sum(100 * (x[..., 1:] - x[..., :-1] ** 2) ** 2
+                  + (1 - x[..., :-1]) ** 2)
+    r.backward()
+    return r.detach().numpy(), x.grad.detach().numpy()
+
+
+# def random_polynom(x):
+#     return 5*x[0] +
