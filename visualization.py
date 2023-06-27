@@ -27,10 +27,10 @@ def calc_axes(visualization_area, visualization_resolution):
 
 
 def visualize_descent_2args(
-    points,
-    f,
-    visualization_area=def_visualization_area,
-    visualization_resolution=def_visualization_resolution,
+        points,
+        f,
+        visualization_area=def_visualization_area,
+        visualization_resolution=def_visualization_resolution,
 ):
     return visualize_multiple_descent_2args(
         {"": points}, f, visualization_area, visualization_resolution
@@ -38,11 +38,11 @@ def visualize_descent_2args(
 
 
 def visualize_multiple_descent_2args(
-    all_points: dict,
-    f,
-    visualization_area=def_visualization_area,
-    visualization_resolution=def_visualization_resolution,
-    print_points=False,
+        all_points: dict,
+        f,
+        visualization_area=def_visualization_area,
+        visualization_resolution=def_visualization_resolution,
+        print_points=False,
 ):
     """
     Функция для визуализации работы градиентного спуска на функции f. Первым
@@ -101,9 +101,9 @@ def visualize_descent(points, f, print_points=False):
 
 
 def visualize_2arg(
-    f,
-    visualization_area=def_visualization_area,
-    visualization_resolution=def_visualization_resolution,
+        f,
+        visualization_area=def_visualization_area,
+        visualization_resolution=def_visualization_resolution,
 ):
     """
     Функция для отрисовки функции f 2х аргуметов
@@ -155,7 +155,7 @@ def visualize_regression(weights: list, X, Y, x_name="", y_name="", regression=p
 
 
 def visualize_multiple_regression(
-    all_weights: dict, X, Y, x_name="", y_name="", line=False
+        all_weights: dict, X, Y, x_name="", y_name="", line=False
 ):
     x_axis = np.linspace(np.min(X), np.max(X), def_visualization_resolution)
 
@@ -220,13 +220,14 @@ def display_stats(points: dict, f, time_e=None, memory=None):
 
 
 def linear_multiple_demo_2args(
-    all_points: dict,
-    f,
-    X,
-    Y,
-    xname="Время подготовки, часы",
-    yname="Балл",
-    to_display_stats=True,
+        all_points: dict,
+        f,
+        X,
+        Y,
+        xname="Время подготовки, часы",
+        yname="Балл",
+        to_display_stats=True,
+        visualization_area=def_visualization_area,
 ):
     if to_display_stats:
         display_stats(all_points, f)
@@ -236,7 +237,7 @@ def linear_multiple_demo_2args(
         step *= 10
         pts_size //= 10
 
-    visualize_multiple_descent_2args(all_points, f)
+    visualize_multiple_descent_2args(all_points, f, visualization_area=visualization_area)
 
     weights = {}
     for i in all_points:
@@ -246,7 +247,7 @@ def linear_multiple_demo_2args(
 
 
 def stats_wrapper(f, display_stats_arg: str):
-    def wrapper(descents, ff, *args, **kwargs):
+    def wrapper(descents, ff, *args, visualize=True, **kwargs):
         all_points = {}
         time_e = {}
         memory = {}
@@ -254,10 +255,11 @@ def stats_wrapper(f, display_stats_arg: str):
             start = time.time()
             all_points[i] = v()
             time_e[i] = time.time() - start
-            memory[i] = memory_usage(v, max_iterations=1)
-            memory[i] = sum(memory[i]) / len(memory[i])
+            init_mem_use = memory_usage(lambda: None, max_iterations=1)
+            memory[i] = max(memory_usage(v, max_iterations=1)) - max(init_mem_use)
         display_stats(all_points, ff, time_e, memory)
-        f(all_points, ff, *args, **kwargs, **{display_stats_arg: False})
+        if visualize:
+            f(all_points, ff, *args, **kwargs, **{display_stats_arg: False})
 
     return wrapper
 
