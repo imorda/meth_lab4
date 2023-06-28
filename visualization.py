@@ -22,7 +22,7 @@ def calc_axes(visualization_area, visualization_resolution):
     """
     axes = []
     for start, stop in visualization_area:
-        axes.append(np.linspace(start, stop, visualization_resolution))
+        axes.append(np.linspace (start, stop, visualization_resolution))
     return axes
 
 
@@ -43,6 +43,7 @@ def visualize_multiple_descent_2args(
         visualization_area=def_visualization_area,
         visualization_resolution=def_visualization_resolution,
         print_points=False,
+        log_trajectory=False,
 ):
     """
     Функция для визуализации работы градиентного спуска на функции f. Первым
@@ -54,6 +55,11 @@ def visualize_multiple_descent_2args(
     fig, (ax1, ax2) = plt.subplots(1, 2)
     X, Y = np.meshgrid(*calc_axes(visualization_area, visualization_resolution))
     values = f(np.stack((X, Y)))
+
+    if log_trajectory:
+        ax2.set_yscale("symlog")
+        ax2.set_xscale("symlog")
+
     ax2.contour(
         X,
         Y,
