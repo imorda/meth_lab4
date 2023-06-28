@@ -22,7 +22,7 @@ def calc_axes(visualization_area, visualization_resolution):
     """
     axes = []
     for start, stop in visualization_area:
-        axes.append(np.linspace (start, stop, visualization_resolution))
+        axes.append(np.linspace(start, stop, visualization_resolution))
     return axes
 
 
@@ -262,7 +262,7 @@ def stats_wrapper(f, display_stats_arg: str):
             all_points[i] = v()
             time_e[i] = time.time() - start
             init_mem_use = memory_usage(lambda: None, max_iterations=1)
-            memory[i] = max(memory_usage(v, max_iterations=1)) - max(init_mem_use)
+            memory[i] = max(0, max(memory_usage(v, max_iterations=1)) - min(init_mem_use))
         display_stats(all_points, ff, time_e, memory)
         if visualize:
             f(all_points, ff, *args, **kwargs, **{display_stats_arg: False})
